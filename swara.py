@@ -1,3 +1,6 @@
+import statistics as stats
+sub_to_main = dict()
+
 def getCriteria():
     main_criteria = [main.strip() for main in (input("Enter main Criteria (comma-separated):\n").split(","))]
     sub_criteria_names = []
@@ -5,6 +8,8 @@ def getCriteria():
     for main_criterion in main_criteria:
         sub_criteria = [sub.strip() for sub in (input(f"Enter sub-criteria of {main_criterion} (comma-separated):\n").split(","))]
         sub_criteria_names += sub_criteria
+        for s in sub_criteria:
+            sub_to_main[s] = main_criterion
         criteria[main_criterion] = sub_criteria
     return main_criteria, sub_criteria_names, criteria
 
@@ -61,6 +66,64 @@ def sortByImportance(main_importance, sub_importance):
     return sorted_main_importance, sorted_sub_importance
 
 
+def get_main_sj_values(sorted_main_criteria, experts):
+    """Gets sj values of every main criterion and returns dictionary of 
+        criterion, sj_value pairs
+
+    Args:
+        sorted_main_criteria (list of lists): [
+            contains list of criteria names and corresponding importance ratings
+            Eg:
+                [
+                    ["main criterion 1", 5],
+                    ["main criterion 2", 7],
+                    ["main criterion 3", 1],
+                ]
+            ]
+        experts (list): [ list of names of experts]
+    Returns:
+        main_sj_dic (dict): [ 
+            A dictionary of criterion name and corresponding sj value pairs
+            ]
+    """
+    main_sj = dict()
+    main_sj[sorted_main_criteria[0][0]] = 0
+
+    for i in range(1, len(sorted_main_criteria)):
+        sj_values = []
+        criterion_rating_pair = sorted_main_criteria[i]
+        criterion = criterion_rating_pair[0]
+        for exp in experts:
+            sj = float(input(f"Enter comparative significance (sj) value of {criterion} by {exp}\t"))
+            sj_values.append(sj)
+        
+        mean_sj = stats.mean(sj_values)
+        main_sj[criterion] = mean_sj
+    
+    return main_sj
+
+
+def get_sub_sj_values(sorted_sub_criteria, experts):
+    sub_sj = dict()
+
+    for inner_sub_criteria in sorted_sub_criteria:
+        sub_sj[inner_sub_criteria[0][0]] = 0
+        main_criterion = sub_to_main.get(inner_sub_criteria[0][0])
+        print(f"\nEnter comparative significance values for sub criteria of {main_criterion}")
+        for i in range(1, len(inner_sub_criteria)):
+            sj_values = []
+            criterion_rating_pair = inner_sub_criteria[i]
+            criterion = criterion_rating_pair[0]
+
+            for exp in experts:
+                sj = float(input(f"Enter comparative significance (sj) value of {criterion} by {exp}\t"))
+                sj_values.append(sj)
+            
+            mean_sj = stats.mean(sj_values)
+            sub_sj[criterion] = mean_sj
+    
+    return sub_sj
+
 def get_inputs():
     experts = [name.strip() for name in (input("Enter name of the experts (comma-separated):\n").split(","))]
     main_criteria, sub_criteria_names, criteria = getCriteria()
@@ -70,5 +133,13 @@ def get_inputs():
 
     sorted_main_imp, sorted_sub_imp = sortByImportance(main_importance, sub_importance)
 
+    main_sj = get_main_sj_values(sorted_main_imp, experts)
+    sub_sj = get_sub_sj_values(sorted_sub_imp, experts)
+
+
 if __name__ == "__main__":
     get_inputs()
+    # kj, qj
+    # wj
+    # get global weigths
+    # sort on the basis of global weights
