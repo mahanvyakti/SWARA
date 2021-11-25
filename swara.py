@@ -1,10 +1,13 @@
 import statistics as stats
-sub_to_main = dict()
+from collections import OrderedDict
+
+sub_to_main = OrderedDict()
 
 def getCriteria():
     main_criteria = [main.strip() for main in (input("Enter main Criteria (comma-separated):\n").split(","))]
     sub_criteria_names = []
-    criteria = dict()
+    criteria = OrderedDict()
+
     for main_criterion in main_criteria:
         sub_criteria = [sub.strip() for sub in (input(f"Enter sub-criteria of {main_criterion} (comma-separated):\n").split(","))]
         sub_criteria_names += sub_criteria
@@ -22,6 +25,7 @@ def get_main_importance(criteria, experts):
             ratings.append(r)
         sum_rating = sum(ratings)
         importance_list.append([criterion, sum_rating])
+    
     return importance_list
 
 def get_sub_importance(criteria_dict, experts):
@@ -50,6 +54,7 @@ def get_sub_importance(criteria_dict, experts):
             sum_rating = sum(ratings)
             sub_importance_list.append([sub_criterion, sum_rating])
         importance_list.append(sub_importance_list)
+    
     return importance_list
 
 def sort(criteria):
@@ -86,7 +91,7 @@ def get_main_sj_values(sorted_main_criteria, experts):
             A dictionary of criterion name and corresponding sj value pairs
             ]
     """
-    main_sj = dict()
+    main_sj = OrderedDict()
     main_sj[sorted_main_criteria[0][0]] = 0
 
     for i in range(1, len(sorted_main_criteria)):
@@ -104,7 +109,7 @@ def get_main_sj_values(sorted_main_criteria, experts):
 
 
 def get_sub_sj_values(sorted_sub_criteria, experts):
-    sub_sj = dict()
+    sub_sj = OrderedDict()
 
     for inner_sub_criteria in sorted_sub_criteria:
         sub_sj[inner_sub_criteria[0][0]] = 0
@@ -136,10 +141,88 @@ def get_inputs():
     main_sj = get_main_sj_values(sorted_main_imp, experts)
     sub_sj = get_sub_sj_values(sorted_sub_imp, experts)
 
+    return criteria, main_importance, sub_importance, sorted_main_imp, sorted_sub_imp, main_sj, sub_sj
+
+def calculate_kj_qj(sj_dict):
+    kj_dict = OrderedDict()
+    qj_dict = OrderedDict()
+    qj_prev = 1
+
+    for criterion, sj in sj_dict.items():
+        kj = sj + 1
+        qj = qj_prev / kj
+        qj_prev = qj
+
+        kj_dict[criterion] = kj
+        qj_dict[criterion] = qj
+
+    return kj_dict, qj_dict
+
+
+def calculate_weights(sj_dict):
+    kj_dict, qj_dict = calculate_kj_qj(sj_dict)
+    
+    wj_dict = OrderedDict()
+    qj_sum = 0
+    
+    for qj in qj_dict.values():
+        qj_sum += qj
+    
+    for criterion, qj in qj_dict.items():
+        wj_dict[criterion] = qj / qj_sum
+    
+    return kj_dict, qj_dict, wj_dict
+
+
+def calculate_global_weights(wj_main, wj_sub):
+    global_weights = OrderedDict()
+    for sub_criterion, wj_sub in wj_sub.items():
+        global_weights[sub_criterion] = wj_main.get(sub_to_main.get(sub_criterion)) * wj_sub
+    
+    return global_weights
+
+def sort_sub_criteria(global_weigths):
+    rank_dict = OrderedDict()
+
+    global_weights_list = [[sub_criterion, wj_sub] for sub_criterion, wj_sub in global_weigths.items()]
+    sorted_global_weights = sort(global_weights_list)
+
+    for index, sub_rank in enumerate(sorted_global_weights):
+        criterion = sub_rank[0]
+        rank = index + 1
+        rank_dict[criterion] = rank
+    
+    return rank_dict
+
+
+def print_results(criteria_dict, wj_main, wj_sub, ranks):
+    print("\nThe Ranking:\n")
+    main_index = 1
+    for main_criterion, sub_criteria in criteria_dict.items():
+        print("\nSr. No.\t\tMain Criterion\tRelative Weight")
+        main_rel_wt = wj_main.get(main_criterion)
+        print(f"{main_index}\t\t{main_criterion}\t\t{main_rel_wt}\n" )
+        
+        print("  Sr. No.\tSub Criteria\tGlobal Weights\t\tRank")
+        for sub_index, sub_criterion in enumerate(sub_criteria):
+            rank = ranks.get(sub_criterion)
+            global_wt = global_weights.get(sub_criterion)
+            print("  " + chr(sub_index + 97) + ".\t\t" + sub_criterion, "\t\t" + str(global_wt) + "\t" + str(rank))
+        
+        main_index +=1
+        print("\n"+ "-"*60)
+
 
 if __name__ == "__main__":
-    get_inputs()
-    # kj, qj
-    # wj
+    criteria_dict, main_importance, sub_importance, sorted_main_imp, sorted_sub_imp, main_sj, sub_sj = get_inputs()
+    
+    kj_main, qj_main, wj_main = calculate_weights(main_sj)
+    kj_sub, qj_sub, wj_sub =  calculate_weights(sub_sj)
+
     # get global weigths
+    global_weights = calculate_global_weights(wj_main, wj_sub)
+
     # sort on the basis of global weights
+    ranks = sort_sub_criteria(global_weights)
+
+    print_results(criteria_dict, wj_main, wj_sub, ranks)
