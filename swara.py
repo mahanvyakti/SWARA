@@ -4,6 +4,19 @@ from collections import OrderedDict
 sub_to_main = OrderedDict()
 
 def getCriteria():
+    """
+    Accepts main and sub criteria nammes from the user
+        and creates the corresponding matrix.
+        
+        Parameters:
+        ------- 
+            none
+
+        Returns:
+        -------
+        `main criteria`: list of names of main criteria
+        `sub criteria`: list of names of sub criteria
+    """
     main_criteria = [main.strip() for main in (input("Enter main Criteria (comma-separated):\n").split(","))]
     sub_criteria_names = []
     criteria = OrderedDict()
@@ -17,6 +30,18 @@ def getCriteria():
     return main_criteria, sub_criteria_names, criteria
 
 def get_main_importance(criteria, experts):
+    """
+    Accepts expert weights of main criteria from the user
+        and creates the corresponding matrix.
+        
+        Parameters:
+        ------- 
+            none
+
+        Returns:
+        -------
+        `importance list`: list of expert given weights of main criteria
+     """
     importance_list = []
     for criterion in criteria:
         ratings = []
@@ -30,6 +55,13 @@ def get_main_importance(criteria, experts):
 
 def get_sub_importance(criteria_dict, experts):
     """
+    Accepts expert weights of sub criteria from the user
+        and creates the corresponding matrix.
+        
+        Parameters:
+        ------- 
+            none
+            
     imporatance_list = 
     [
         [                   ===> sub_importance_list
@@ -41,6 +73,9 @@ def get_sub_importance(criteria_dict, experts):
             [s4, r4]            ===> [sub_criteron, its_sum_of_ratings]
         ]
     ]
+    Returns:
+        -------
+        `importance list`: list of expert given weights of main and sub criteria
     """
     importance_list = []
     for main_criterion, sub_criteria in criteria_dict.items():
@@ -58,9 +93,31 @@ def get_sub_importance(criteria_dict, experts):
     return importance_list
 
 def sort(criteria):
+    """
+        Sorts the criteria in decending order.
+        
+        Parameters:
+        ------- 
+            none
+
+        Returns:
+        -------
+            Sorted criteria.
+    """
     return sorted(criteria, reverse=True, key=lambda x:x[1])
 
 def sortByImportance(main_importance, sub_importance):
+    """
+        Sorts the main and sub importance list in decending order.
+        
+        Parameters:
+        ------- 
+            none
+
+        Returns:
+        -------
+            Sorted main and sub importance list.
+    """
     sorted_main_importance = sort(main_importance)
 
     sorted_sub_importance = []
@@ -72,7 +129,8 @@ def sortByImportance(main_importance, sub_importance):
 
 
 def get_main_sj_values(sorted_main_criteria, experts):
-    """Gets sj values of every main criterion and returns dictionary of 
+    """
+    Gets sj values of every main criterion and returns dictionary of 
         criterion, sj_value pairs
 
     Args:
@@ -109,6 +167,26 @@ def get_main_sj_values(sorted_main_criteria, experts):
 
 
 def get_sub_sj_values(sorted_sub_criteria, experts):
+    """
+    Gets sj values of every sub criterion and returns dictionary of 
+        criterion, sj_value pairs
+
+    Args:
+        sorted_sub_criteria (list of lists): [
+            contains list of criteria names and corresponding importance ratings
+            Eg:
+                [
+                    ["sub criterion 1", 5],
+                    ["sub criterion 2", 7],
+                    ["sub criterion 3", 1],
+                ]
+            ]
+        experts (list): [ list of names of experts]
+    Returns:
+        sub_sj_dic (dict): [ 
+            A dictionary of criterion name and corresponding sj value pairs
+            ]
+    """
     sub_sj = OrderedDict()
 
     for inner_sub_criteria in sorted_sub_criteria:
@@ -130,6 +208,18 @@ def get_sub_sj_values(sorted_sub_criteria, experts):
     return sub_sj
 
 def get_inputs():
+    """
+    Accepts expert names from the user
+        and creates the corresponding matrix.
+        
+        Parameters:
+        ------- 
+            `criteria`: list of names of criteria
+
+        Returns:
+        -------
+        
+     """
     experts = [name.strip() for name in (input("Enter name of the experts (comma-separated):\n").split(","))]
     main_criteria, sub_criteria_names, criteria = getCriteria()
 
@@ -144,6 +234,16 @@ def get_inputs():
     return criteria, main_importance, sub_importance, sorted_main_imp, sorted_sub_imp, main_sj, sub_sj
 
 def calculate_kj_qj(sj_dict):
+     """
+       Calculates kj and qj values.
+        
+        Parameters:
+        ------- 
+            `sj_dict`: list of sj values.
+
+        Returns:
+        kj and qj list.
+     """
     kj_dict = OrderedDict()
     qj_dict = OrderedDict()
     qj_prev = 1
@@ -160,6 +260,16 @@ def calculate_kj_qj(sj_dict):
 
 
 def calculate_weights(sj_dict):
+     """
+       Calculates wj values.
+        
+        Parameters:
+        ------- 
+            `sj_dict`: list of sj values.
+
+        Returns:
+        wj list.
+     """
     kj_dict, qj_dict = calculate_kj_qj(sj_dict)
     
     wj_dict = OrderedDict()
@@ -175,6 +285,16 @@ def calculate_weights(sj_dict):
 
 
 def calculate_global_weights(wj_main, wj_sub):
+    """
+       Calculates global weight values.
+        
+        Parameters:
+        ------- 
+            `wj_main`: list of main criteria wj values.
+            `wj_sub`: list of sub criteria wj values.
+        Returns:
+        Global weight list.
+     """
     global_weights = OrderedDict()
     for sub_criterion, wj_sub in wj_sub.items():
         global_weights[sub_criterion] = wj_main.get(sub_to_main.get(sub_criterion)) * wj_sub
@@ -182,6 +302,15 @@ def calculate_global_weights(wj_main, wj_sub):
     return global_weights
 
 def sort_sub_criteria(global_weigths):
+    """
+       Calculates global weight values.
+        
+        Parameters:
+        ------- 
+            `global_weigths`: list of global weight values.
+        Returns:
+            'rank_dict' : Ranks of the sub criteria.
+     """
     rank_dict = OrderedDict()
 
     global_weights_list = [[sub_criterion, wj_sub] for sub_criterion, wj_sub in global_weigths.items()]
@@ -196,6 +325,18 @@ def sort_sub_criteria(global_weigths):
 
 
 def print_results(criteria_dict, wj_main, wj_sub, ranks):
+    """
+      Prints the sorted list with corresponding ranking
+       
+        Parameters:
+        ------- 
+        none
+
+        Returns:
+        -------
+        Sorted List of criteria names, relative & global weights and rank.
+    """
+
     print("\nThe Ranking:\n")
     main_index = 1
     for main_criterion, sub_criteria in criteria_dict.items():
