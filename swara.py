@@ -237,7 +237,7 @@ def get_inputs():
     return criteria, main_importance, sub_importance, sorted_main_imp, sorted_sub_imp, main_sj, sub_sj
 
 def calculate_kj_qj(sj_dict):
-     """
+    """
        Calculates kj and qj values.
         
         Parameters:
@@ -246,7 +246,7 @@ def calculate_kj_qj(sj_dict):
 
         Returns:
         kj and qj list.
-     """
+    """
     kj_dict = OrderedDict()
     qj_dict = OrderedDict()
     qj_prev = 1
@@ -263,7 +263,7 @@ def calculate_kj_qj(sj_dict):
 
 
 def calculate_weights(sj_dict):
-     """
+    """
        Calculates wj values.
         
         Parameters:
@@ -272,7 +272,7 @@ def calculate_weights(sj_dict):
 
         Returns:
         wj list.
-     """
+    """
     kj_dict, qj_dict = calculate_kj_qj(sj_dict)
     
     wj_dict = OrderedDict()
