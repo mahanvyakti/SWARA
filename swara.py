@@ -36,7 +36,8 @@ def get_main_importance(criteria, experts):
         
         Parameters:
         ------- 
-            none
+           `criteria`: list of names of criteria
+           `experts`: list of names of experts
 
         Returns:
         -------
@@ -60,7 +61,8 @@ def get_sub_importance(criteria_dict, experts):
         
         Parameters:
         ------- 
-            none
+           `criteria`: list of names of criteria
+           `experts`: list of names of experts
             
     imporatance_list = 
     [
@@ -98,7 +100,7 @@ def sort(criteria):
         
         Parameters:
         ------- 
-            none
+            `criteria`: list of names of criteria
 
         Returns:
         -------
@@ -112,8 +114,9 @@ def sortByImportance(main_importance, sub_importance):
         
         Parameters:
         ------- 
-            none
-
+           `main_importance`: unsorted main importance values.
+           `sub_importance`: unsorted sub importance values.
+ 
         Returns:
         -------
             Sorted main and sub importance list.
@@ -330,7 +333,10 @@ def print_results(criteria_dict, wj_main, wj_sub, ranks):
        
         Parameters:
         ------- 
-        none
+        'criteria_dict' : Names of criteria.
+        'wj_main': list of main criteria wj values.
+        'wj_sub': list of sub criteria wj values.
+        'rank_dict' : Ranks of the sub criteria.
 
         Returns:
         -------
